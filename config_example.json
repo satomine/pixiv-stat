@@ -1,10 +1,9 @@
 {
-    "user_name": "your_name",
+    "user_name": "your_login_name",
     "password" : "xxxxxxxx",
     
-    "target_content_ids": [
-        52717520,
-        73078172,
-        82366336
+    "target_user_ids": [
+        330328,
+        3013044
     ]
 }

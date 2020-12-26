@@ -1,6 +1,6 @@
 """Write pixiv content metadata in CSV frormat."""
 
-from datetime import date
+import datetime
 
 from pixivstats import Artwork
 
@@ -17,15 +17,15 @@ _HEADER_LINE = ",".join(_COLUMN_LABELS) + "\n"
 
 DATE_FMT = '%Y/%m/%d'
 
-def _write_csv_header(file, artwork: Artwork, comment: str = "# ,"):
-    file.write(comment + f"author_name,{artwork.author_name},title,{artwork.title}\n")
+def _write_csv_header(file, artwork: Artwork, comment_prefix: str = "# ,"):
+    file.write(comment_prefix + f"author_name,{artwork.author_name},title,{artwork.title}\n")
     file.write(_HEADER_LINE)
 
 
-def append_row(file_name, artwork: Artwork, date_ = None):
-    today = date_ or date.today()
+def append_row(file_path, artwork: Artwork, date = None):
+    today = date or datetime.date.today()
     
-    with open(file_name, 'at', newline = '\r\n') as file:
+    with open(file_path, 'at', newline = '\r\n') as file:
         if file.tell() == 0: _write_csv_header(file, artwork)
         
         file.write(f"{today.strftime(DATE_FMT)},"

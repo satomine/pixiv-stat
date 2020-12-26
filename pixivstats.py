@@ -15,7 +15,7 @@ class Artwork(NamedTuple):
     bookmark_count: int
     
     @property
-    def bookmark_view_ratio(self):
+    def bookmark_view_ratio(self) -> float:
         return self.bookmark_count / self.view_count
 
 
@@ -26,11 +26,16 @@ class Follower(NamedTuple):
     nickname    : str
 
 
-def list_artwork_metadata(user_id: int, session):
-    """Fetch the metadata of the works posted by a specific user."""
-    page = session.user_illusts(user_id, type  = "")
+def list_artwork_metadata(user_id: int, session, content_type: str = '') -> list:
+    """Fetch the metadata of the artworks posted by a specific user."""
+    if content_type not in ('', 'illust', 'manga'):
+        raise ValueError("`artwork_type` shall be 'illust', 'manga', or an empty string")
+    
+    # Fetch the artwork data on the first page
+    page = session.user_illusts(user_id, type = content_type)
     artworks = [extract_artwork_metadata(work) for work in page.illusts]
     
+    # Fetch the artwork data on the second and subsequent pages
     while True:
         next_query = session.parse_qs(page.next_url)
         if not next_query: break
@@ -41,15 +46,18 @@ def list_artwork_metadata(user_id: int, session):
     return artworks
 
 
-def fetch_artwork_metadata(content_id: int, session):
+def fetch_artwork_metadata(content_id: int, session) -> Artwork:
     artwork = session.illust_detail(content_id).illust
     return extract_artwork_metadata(artwork)
 
 
-def list_followers(session):
+def list_followers(session) -> list:
+    """Fetch the metadata of the users following the current user."""
+    # Fetch the user data on the first page
     page = session.user_follower(session.user_id)
     followers = [extract_follower_metadata(preview) for preview in page.user_previews]
     
+    # Fetch the user data on the second and subsequent pages
     while True:
         next_query = session.parse_qs(page.next_url)
         if not next_query: break
@@ -61,14 +69,14 @@ def list_followers(session):
 
 
 def login(user_name: str, password: str):
-    """Log-in to pixiv and return the session"""
+    """Log-in to pixiv and return the session."""
     api = AppPixivAPI()
     api.login(user_name, password)
     
     return api
 
 
-def extract_artwork_metadata(artwork_meta):
+def extract_artwork_metadata(artwork_meta) -> Artwork:
     """Drop unnecessary artwork data and convert into a named tuple."""
     return Artwork(artwork_meta.id,
                    artwork_meta.user.id,
@@ -79,7 +87,7 @@ def extract_artwork_metadata(artwork_meta):
                    artwork_meta.total_bookmarks)
 
 
-def extract_follower_metadata(follower_preview):
+def extract_follower_metadata(follower_preview) -> Follower:
     """Drop unnecessary follower data and convert into a named tuple."""
     return Follower(follower_preview.user.id,
                     follower_preview.user.account,
