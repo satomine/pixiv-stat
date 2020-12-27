@@ -16,6 +16,7 @@ class Artwork(NamedTuple):
     
     @property
     def bookmark_view_ratio(self) -> float:
+        if self.view_count == 0: return 0.0
         return self.bookmark_count / self.view_count
 
 
